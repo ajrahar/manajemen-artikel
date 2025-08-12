@@ -2,31 +2,27 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button'; // from shadcn/ui
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'; // from shadcn/ui
+} from '@/components/ui/dropdown-menu';
 
-// Use the same Category interface from your page
-interface Category {
-  id: string;
-  name: string;
-}
-
+interface Category { id: string; name: string; }
 interface CategoryFilterProps {
   categories: Category[];
+  // Callback function untuk mengirim ID kategori yang dipilih
+  onSelectCategory: (categoryId: string | null) => void;
 }
 
-export default function CategoryFilter({ categories }: CategoryFilterProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('Select category');
+export default function CategoryFilter({ categories, onSelectCategory }: CategoryFilterProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
 
-  const handleSelect = (categoryName: string) => {
-    setSelectedCategory(categoryName);
-    // Here you would typically trigger a filter action,
-    // e.g., by updating a URL query parameter
+  const handleSelect = (category: Category | null) => {
+    setSelectedCategory(category ? category.name : 'All Categories');
+    onSelectCategory(category ? category.id : null); // Kirim ID atau null
   };
 
   return (
@@ -41,13 +37,13 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-48">
-        <DropdownMenuItem onSelect={() => handleSelect('All Categories')}>
+        <DropdownMenuItem onSelect={() => handleSelect(null)}>
           All Categories
         </DropdownMenuItem>
         {categories.map((category) => (
           <DropdownMenuItem
             key={category.id}
-            onSelect={() => handleSelect(category.name)}
+            onSelect={() => handleSelect(category)}
           >
             {category.name}
           </DropdownMenuItem>
