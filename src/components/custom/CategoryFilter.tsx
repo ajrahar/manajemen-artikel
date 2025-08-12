@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,16 +13,21 @@ import {
 interface Category { id: string; name: string; }
 interface CategoryFilterProps {
   categories: Category[];
-  // Callback function untuk mengirim ID kategori yang dipilih
   onSelectCategory: (categoryId: string | null) => void;
+  value: string | null; // Add this property to match the usage
 }
 
-export default function CategoryFilter({ categories, onSelectCategory }: CategoryFilterProps) {
+export default function CategoryFilter({ categories, onSelectCategory, value }: CategoryFilterProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
+
+  useEffect(() => {
+    const selected = categories.find((category) => category.id === value);
+    setSelectedCategory(selected ? selected.name : 'All Categories');
+  }, [value, categories]);
 
   const handleSelect = (category: Category | null) => {
     setSelectedCategory(category ? category.name : 'All Categories');
-    onSelectCategory(category ? category.id : null); // Kirim ID atau null
+    onSelectCategory(category ? category.id : null); // Send ID or null
   };
 
   return (

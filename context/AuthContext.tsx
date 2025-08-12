@@ -1,24 +1,28 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 
-// Define the shape of the context's value
+// UPDATE: Tambahkan 'role' ke tipe data user
+interface User {
+  username: string;
+  role: 'Admin' | 'User';
+}
+
 interface AuthContextType {
-  user: { username: string } | null;
-  login: (userData: { username: string }) => void;
+  user: User | null;
+  login: (userData: User) => void;
   logout: () => void;
   isLoading: boolean;
 }
 
-// Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Create the provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ username: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  // Check for user session on initial load
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem('user');
@@ -27,13 +31,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
-      localStorage.removeItem('user'); // Clear corrupted data
+      localStorage.removeItem('user');
     } finally {
         setIsLoading(false);
     }
   }, []);
 
-  const login = (userData: { username: string }) => {
+  const login = (userData: User) => {
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
   };
@@ -41,6 +45,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     localStorage.removeItem('user');
     setUser(null);
+    // Redirect ke halaman utama setelah logout
+    router.push('/');
   };
 
   return (
@@ -50,7 +56,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Create a custom hook for easy access to the context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
